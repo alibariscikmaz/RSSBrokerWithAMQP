@@ -133,6 +133,7 @@
             this.btnPublish.TabIndex = 8;
             this.btnPublish.Text = "Start Publishing";
             this.btnPublish.UseVisualStyleBackColor = true;
+            this.btnPublish.Click += new System.EventHandler(this.btnPublish_Click);
             // 
             // lbError
             // 
