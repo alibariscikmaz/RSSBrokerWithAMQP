@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
+using RabbitMQ.Client;
 
 namespace AMQPProducer
 {
@@ -109,6 +110,29 @@ namespace AMQPProducer
             dgwRSSList.DataSource = ds.Tables["RSSFeeds"];
             dgwRSSList.ReadOnly = true;
             dgwRSSList.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        }
+
+        private void btnPublish_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < dgwRSSList.Rows.Count - 1; i++)
+            {
+                var factory = new ConnectionFactory
+                {
+                    Uri = new Uri("amqp://guest:guest@localhost:5672")
+                };
+                using var cnn = factory.CreateConnection();
+                using var ch = cnn.CreateModel();
+
+                List<CPublishDirectExchange> messageList = new List<CPublishDirectExchange>();
+                messageList = CPublishDirectExchange.RSSURLToMessages(dgwRSSList.Rows[i].Cells[0].Value.ToString());
+
+                CPublishDirectExchange publisher = new CPublishDirectExchange();
+
+                foreach (var message in messageList)
+                {
+                    publisher.PublishToExchange(ch, dgwRSSList.Rows[i].Cells[1].Value.ToString(), message);
+                }
+            }
         }
     }
 }
